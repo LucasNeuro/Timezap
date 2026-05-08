@@ -1,0 +1,17 @@
+# Blueprint Render: New → Blueprint → ligar ao repositório Git.
+# Define MISTRAL_API_KEY em Environment (secret). Opcional: MISTRAL_MODEL_ID.
+#
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: timezap-agent
+    runtime: python
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: python run.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      # Render define PORT e RENDER=true automaticamente
+      - key: MISTRAL_API_KEY
+        sync: false
