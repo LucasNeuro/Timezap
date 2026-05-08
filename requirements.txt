@@ -3,6 +3,7 @@ mistralai>=1.0.0
 fastapi>=0.110.0
 uvicorn[standard]>=0.30.0
 python-dotenv>=1.0.0
+httpx>=0.27.0
 certifi>=2024.8.30
 truststore>=0.10.0
 # O pacote ``agno`` importa sqlalchemy para SqliteDb; tem de estar explícito no deploy.

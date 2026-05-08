@@ -22,9 +22,10 @@ from typing import Any
 
 from dotenv import load_dotenv
 
-from timezap_docs import compose_agent_instructions_from_docs
-
 load_dotenv()
+
+from timezap_docs import compose_agent_instructions_from_docs
+from timezap_uazapi import UazapiWhatsappInterface, uazapi_config
 
 
 def _certifi_bundle_path() -> str | None:
@@ -134,8 +135,13 @@ _enable_agno_telemetry = (
     os.getenv("AGNO_TELEMETRY", "0").strip().lower() in ("1", "true", "yes", "on")
 )
 
+_uazapi_interfaces = []
+if uazapi_config() is not None:
+    _uazapi_interfaces.append(UazapiWhatsappInterface(agent=agent_simples))
+
 agent_os = AgentOS(
     agents=[agent_simples],
     telemetry=_enable_agno_telemetry,
+    interfaces=_uazapi_interfaces,
 )
 app = agent_os.get_app()
