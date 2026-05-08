@@ -1,22 +1,63 @@
-# Deploy no Render — Web Service Timezap
-
-## Erro típico: `Application exited early`
-
-Se nos logs do deploy aparece:
-
-`Running 'pip install ...'` **na fase Deploy** e depois **`Application exited early`**, quase sempre o **Start Command** está igual ao **Build Command** (só instala pacotes e o processo acaba).
-
-- **Build Command:** `pip install --upgrade pip && pip install -r requirements.txt` (ou só `pip install -r requirements.txt`)
-- **Start Command (tem de arrancar o servidor):** um destes:
-  - `uvicorn app:app --host 0.0.0.0 --port $PORT` **(recomendado)**, ou
-  - `python run.py`
-
-Este repositório inclui **`Procfile`**. Se no painel Render deixares o **Start Command vazio**, o Render pode usar o `Procfile` com `uvicorn`.
-
-## Variáveis
-
-No painel **Environment**, define pelo menos `MISTRAL_API_KEY`. O Render injeta `PORT` e `RENDER=true`.
-
-## Python
-
-Para evitar 3.14.x por defeito, define **`PYTHON_VERSION=3.11.9`** nos Environment Variables e faz redeploy.
+# Deploy no Render — Timezap
+
+O teu log **ainda** mostra na fase **Deploy** something como:
+
+`Running 'pip install --upgrade pip && pip install -r requirements.txt'`
+
+e depois **Application exited early**. Isso só acontece quando o **Start Command** no painel do Render está **igual ao Build Command** (instala pacotes e termina — **não há servidor**).
+
+---
+
+## Correção imediata (Web Service em “Python”)
+
+1. Abre [Render Dashboard](https://dashboard.render.com) → serviço **Timezap** → **Settings**.
+2. Localiza **Start Command**.
+3. **Apaga tudo** que seja `pip install` (ou comando de build).
+4. Cola **uma** destas linhas (recomendado a primeira):
+
+```bash
+uvicorn app:app --host 0.0.0.0 --port $PORT
+```
+
+ou:
+
+```bash
+python run.py
+```
+
+5. Confirma que **Build Command** continua só com `pip install …` (esse é o lugar certo para o pip).
+6. **Save Changes** → **Manual Deploy**.
+
+O **`Procfile`** do repositório **só vale** se o **Start Command estiver vazio**; se o campo tiver `pip install`, o Render **ignora** o Procfile.
+
+---
+
+## Opção Dockerfile (menos erro de configuração)
+
+O repositório tem **`Dockerfile`** que faz build e arranca só com **`uvicorn`**.
+
+1. No mesmo serviço (ou novo): **Settings** → muda **Environment** / tipo de runtime para **Docker** (mantendo o mesmo repositório).
+2. **Dockerfile path:** `Dockerfile` (raiz do repo).
+3. **Start Command** no painel: **deixa vazio** (usa o `CMD` do Dockerfile).
+4. **Save** → redeploy.
+
+O `render.yaml` do repo está alinhado com **Docker** para quem usar **Blueprint**.
+
+---
+
+## Variáveis necessárias
+
+- **`MISTRAL_API_KEY`** (secret), no Environment do serviço.
+- **`PORT`** — o Render injeta; não definas à mão.
+
+---
+
+## Resumo
+
+| Fase Render    | Deve corresponder a…                                      |
+|----------------|------------------------------------------------------------|
+| Build          | `pip install -r requirements.txt` (etc.)                   |
+| Start / Deploy | `uvicorn app:app --host 0.0.0.0 --port $PORT` **ou** Dockerfile |
+
+Enquanto o Start for `pip install`, o deploy **sempre** falha da mesma forma.
+
