@@ -4,3 +4,7 @@ uvicorn[standard]>=0.30.0
 python-dotenv>=1.0.0
 certifi>=2024.8.30
 truststore>=0.10.0
+# O pacote ``agno`` importa sqlalchemy para SqliteDb; tem de estar explícito no deploy.
+sqlalchemy>=2.0.0
+# Cli Agno/UI interna já usam Rich; pin explícito evita inconsistências (logs no portal Render continuam texto simples).
+rich>=13.7.0
